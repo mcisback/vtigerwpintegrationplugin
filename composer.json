@@ -1,0 +1,20 @@
+{
+    "name": "mcisback/vtigerwpintegration",
+    "description": "Integrate Wordpress with vTiger API",
+    "type": "project",
+    "license": "ISC",
+    "autoload": {
+        "psr-4": {
+            "Mcisback\\vTigerWpIntegration\\": "src/",
+            "Mcisback\\WpPlugin\\": "wpPlugin/",
+            "Mcisback\\vTiger\\": "vTiger/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Marco Caggiano",
+            "email": "mcisback@gmail.com"
+        }
+    ],
+    "require": {}
+}
