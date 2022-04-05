@@ -15,11 +15,11 @@ if( ! defined( 'ABSPATH' ) ) {
     return;
 }
 
-require_once 'vendor/autoload.php';
+require_once plugin_dir_path( __FILE__ ) . '/vendor/autoload.php';
 
 use Mcisback\vTigerWpIntegration\vTigerWpIntegrationPlugin;
 
-require_once './config.php';
+require_once plugin_dir_path( __FILE__ ) . '/config.php';
 
 global $wpVtigerIntegration;
 

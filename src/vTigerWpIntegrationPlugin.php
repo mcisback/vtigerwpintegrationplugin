@@ -1,16 +1,14 @@
 <?php
 namespace Mcisback\vTigerWpIntegration;
 
-use Mcisback\Wp\Base\Plugin as wpBasePlugin;
+use Mcisback\WpPlugin\Base\Plugin as wpBasePlugin;
+use Mcisback\WpPlugin\Helpers\ViewHelper;
 
 if( !class_exists('vTigerWpIntegrationPlugin') ) {
 
     class vTigerWpIntegrationPlugin extends wpBasePlugin {
         function __construct() {
-
             parent::__construct();
-            //add_action( 'init', array( $this, 'init' ) );
-    
         }
 
         function init() {
@@ -19,7 +17,7 @@ if( !class_exists('vTigerWpIntegrationPlugin') ) {
 
             if( $this->isCurrentUserAdmin() ) {
 
-                add_action( 'admin_menu', array( $this, 'admin_menu' ) );
+                add_action( 'admin_menu', [ $this, 'admin_menu' ] );
 
                 $this->addAjaxAction( "updateCustomPost" , "updateCustomPost" );
 
@@ -27,7 +25,7 @@ if( !class_exists('vTigerWpIntegrationPlugin') ) {
 
             //$this->add_custom_roles();
 
-            add_action( 'admin_head', array( $this, 'loadBootstrap' ) );
+            add_action( 'admin_head', [ $this, 'loadBootstrap' ] );
 
         }
 
@@ -40,11 +38,11 @@ if( !class_exists('vTigerWpIntegrationPlugin') ) {
         function admin_menu () {
 
             add_menu_page(
-                'NotifyBot',
-                'NotifyBot',
+                'vTigerWp',
+                'vTigerWp',
                 'administrator',
-                'notifybot',
-                array( $this, 'mainView' )
+                'vTigerWp',
+                [ $this, 'mainView' ]
             );
 
         }
@@ -52,14 +50,13 @@ if( !class_exists('vTigerWpIntegrationPlugin') ) {
         function mainView () {
 
             ViewHelper::includeWithVariables(
-                PLUGIN_PATH . "/views/main.view.php",
-                array(
-            'isAdmin' => $this->isCurrentUserAdmin(),
-                ),
-            PRINT_OUTPUT,
-            array(
-                "{{fbWebhookUrl}}" => plugins_url() . '/' . basename(plugin_dir_path(__FILE__)) . '/fb-webhook.php'
-            )
+                PLUGIN_PATH . "/src/views/main.view.php",
+                [
+                    'isAdmin' => $this->isCurrentUserAdmin(),
+                ],
+                PRINT_OUTPUT,
+                [
+                ]
             );
 
         }
