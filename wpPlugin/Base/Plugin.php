@@ -13,7 +13,7 @@ abstract class Plugin {
 
 	function __construct() {
 
-		add_action( 'init', array( $this, 'init' ) );
+		add_action( 'init', [ $this, 'init' ] );
 
 	}
 
@@ -36,39 +36,29 @@ abstract class Plugin {
 
     }
 
-    function addAjaxAction( $action, $functionName ) {
+    function addAjaxAction( string $action, string $functionName, $obj=null ) {
 
+        if($obj === null) {
+            $obj = $this;
+        }
+
+        // Action For Logged In
         add_action(
             "wp_ajax_$action",
-            array( $this, "$functionName" )
+            [ $obj, $functionName ]
         );
 
+        // Action For Not Logged In
         add_action(
-            'wp_ajax_nopriv_$action',
-            array( $this, "$functionName" )
+            "wp_ajax_nopriv_$action",
+            [ $obj, $functionName ]
         );
 
     }
 
     public function addAction( $action, $functionName ) {
 
-        add_action( $action, array( $this, $functionName ) );
-
-    }
-
-    public function ajaxRespondJson( array $responseArray ) {
-
-        echo json_encode( $responseArray );
-
-        wp_die();
-
-    }
-
-    public function ajaxRespondString ( $str ) {
-
-        echo $str;
-
-        wp_die();
+        add_action( $action, [ $this, $functionName ] );
 
     }
 
@@ -89,6 +79,48 @@ abstract class Plugin {
 
         //var_dump( $_SESSION );
 
+    }
+
+    public function loadAdminAjaxActions(
+        string $pluginPath,
+        string $ajaxActionNamespace = ''
+    ) {
+        $ajaxActions = glob(
+            PLUGIN_PATH . "/src/Admin/Ajax/Actions/*.php"
+        );
+
+        if($ajaxActionNamespace === ''){
+            $class_name = get_class($this);
+
+            $reflection_class = new \ReflectionClass($class_name);
+
+            $ajaxActionNamespace = $reflection_class->getNamespaceName();
+            $ajaxActionNamespace .= '\\Admin\\Ajax\\Actions';
+        }
+
+        // echo "CURRENT_NAMESPACE: " . $ajaxActionNamespace . "<br>";
+
+        foreach ($ajaxActions as $ajaxActionPath) {
+            $pathParts = pathinfo($ajaxActionPath);
+            $className = $pathParts['filename'];
+
+            $actionClass = "$ajaxActionNamespace\\$className";
+
+            $ajaxActionObj = new $actionClass();
+
+            /* echo 'ACTION_CLASS: ' . $actionClass;
+            echo '<br>';
+            echo 'CLASS_NAME: ' . $className;
+            echo '<br>';
+
+            print_r($ajaxActionObj); */
+
+            $this->addAjaxAction( 
+                $className,
+                $ajaxActionObj->getRunFunctionName(),
+                $ajaxActionObj
+            );
+        }
     }
 
 	public abstract function init();

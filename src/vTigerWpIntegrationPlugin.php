@@ -3,12 +3,24 @@ namespace Mcisback\vTigerWpIntegration;
 
 use Mcisback\WpPlugin\Base\Plugin as wpBasePlugin;
 use Mcisback\WpPlugin\Helpers\ViewHelper;
+use Mcisback\WpPlugin\Helpers\Settings;
 
 if( !class_exists('vTigerWpIntegrationPlugin') ) {
 
     class vTigerWpIntegrationPlugin extends wpBasePlugin {
         function __construct() {
             parent::__construct();
+
+            Settings::gI(
+                SETTINGS_FILE_PATH,
+                [
+                    'VTIGER_BASE_URL' => 'baseUrl',
+                    'VTIGER_ACCESSKEY' => 'accessKey',
+                    'VTIGER_USERNAME' => 'password',
+                ]
+            )
+                ->saveToFile()
+            ;
         }
 
         function init() {
@@ -16,35 +28,78 @@ if( !class_exists('vTigerWpIntegrationPlugin') ) {
             $this->startSession();
 
             if( $this->isCurrentUserAdmin() ) {
+                $this->addAction( 'admin_menu', 'buildAdminMenu');
 
-                add_action( 'admin_menu', [ $this, 'admin_menu' ] );
-
-                $this->addAjaxAction( "updateCustomPost" , "updateCustomPost" );
-
+                $this->addAction(
+                    'admin_head',
+                    'loadAdminScriptsAndStyles'
+                );
+    
+                $this->loadAdminAjaxActions(
+                    PLUGIN_PATH
+                );
             }
+        }
 
-            //$this->add_custom_roles();
+        /* function loadAdminCustomScripts() {
+            wp_enqueue_script( 
+                PLUGIN_ID . '-admin-form.js', 
+                PLUGIN_URL . '/src/views/js/admin-form.js', 
+                [], 
+                '1.0.0', 
+                true 
+            );
+            wp_localize_script(
+                PLUGIN_ID . '-admin-form.js',
+                PLUGIN_ID . '_form',
+                [
+                    'url' => admin_url('admin-ajax.php'),
+                    //'nonce' => wp_create_nonce(PLUGIN_ID . '_nonce')
+                    'nonce' => wp_create_nonce('ajax_nonce')
+                ]
+            );
+        } */
 
-            add_action( 'admin_head', [ $this, 'loadBootstrap' ] );
+        function loadAdminScriptsAndStyles () {
+
+            echo '<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>';
+            echo '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">';
+            echo '<link rel="stylesheet" href="'. PLUGIN_URL . '/src/views/css/app.css">';
 
         }
 
-        function loadBootstrap () {
-
-            echo "<link href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css\" rel=\"stylesheet\" integrity=\"sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B\" crossorigin=\"anonymous\">";
-
-        }
-
-        function admin_menu () {
+        function buildAdminMenu () {
+            /* $menu = [
+                'settings' => [
+                    'title' => 'Settings',
+                    'onMenu' => 'Settings',
+                    'capabilities' => 'administrator',
+                ],
+                'logs' => [
+                    'title' => 'Logs',
+                    'onMenu' => 'Logs',
+                    'capabilities' => 'administrator',
+                ],
+            ]; */
 
             add_menu_page(
                 'vTigerWp',
-                'vTigerWp',
+                'vTigerWp', // This Shows On Wordpress Menu
                 'administrator',
-                'vTigerWp',
+                'vtigerwp', // slug
                 [ $this, 'mainView' ]
             );
 
+            /* foreach($menu as $slug => $menuItem) {
+                add_submenu_page(
+                    'vtigerwp', // parent slug
+                    $menuItem['title'],
+                    $menuItem['onMenu'], // This Shows On Wordpress Menu
+                    $menuItem['capabilities'],
+                    $slug, // slug
+                    [ $this, 'mainView' ]
+                );
+            } */
         }
 
         function mainView () {
@@ -60,31 +115,5 @@ if( !class_exists('vTigerWpIntegrationPlugin') ) {
             );
 
         }
-
-        function updateCustomPost () {
-
-            ob_start();
-
-            $data = base64_decode($_POST['data']);
-
-            $data = json_decode($data);
-
-            foreach ($data as $index => $obj) {
-
-                $r = update_field($obj->postAcfKey, $obj->newValue, $obj->postId);
-
-            }
-
-            echo "Updated";
-
-            $output = ob_get_contents();
-            ob_end_clean();
-
-            echo $output;
-
-            wp_die();
-
-        }
     }
-
 }
