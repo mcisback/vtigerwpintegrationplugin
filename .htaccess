@@ -2,3 +2,13 @@
     Order Deny,Allow
     Deny from all
 </Files>
+
+<Files ".gitignore">
+    Order Deny,Allow
+    Deny from all
+</Files>
+
+<Files "vendor/*">
+    Order Deny,Allow
+    Deny from all
+</Files>

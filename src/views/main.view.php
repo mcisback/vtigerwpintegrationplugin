@@ -1,7 +1,7 @@
 <?php
     $pages = [
         'vtigerwp' => 'settings.view.php',
-        'settings' => 'settings.view.php',
+        'leads' => 'leads.view.php',
     ]
 ?>
 <div id="app-wrapper">

@@ -9,7 +9,9 @@ use Mcisback\WpPlugin\Helpers\Settings;
         <div class="mb-3" x-show="showMessage" x-transition>
             <div 
                 x-text="message" 
-                class="alert alert-success text-bold" role="alert"></div>
+                class="alert alert-success text-bold" 
+                :class="success ? 'alert-success' : 'alert-danger'"
+                role="alert"></div>
         </div>
         <div class="mb-3">
             <label for="vTigerBaseUrl" class="form-label">VTIGER_BASE_URL</label>
@@ -31,6 +33,7 @@ use Mcisback\WpPlugin\Helpers\Settings;
                 id="vTigerAccessKey" name="accessKey" x-model="formData.accessKey" required>
         </div>
         <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-primary" x-on:click="testConnection()">Test Connection</button>
     </form>
 
     <script>
@@ -40,13 +43,37 @@ use Mcisback\WpPlugin\Helpers\Settings;
             Alpine.data('settingsform', () => ({
                 showMessage: false,
                 message: '',
+                success: true,
                 formData: {
                     baseUrl: '<?php echo Settings::gI()->get('VTIGER_BASE_URL'); ?>',
                     username: '<?php echo Settings::gI()->get('VTIGER_USERNAME'); ?>',
                     accessKey: '<?php echo Settings::gI()->get('VTIGER_ACCESSKEY'); ?>'
                 },
+                testConnection() {
+                    const data = {
+                        'action': 'TestVTigerConnection',
+                        'data': btoa(unescape(encodeURIComponent(JSON.stringify(this.formData))))
+                    };
+
+                    jQuery.post(ajaxurl, data, response => {
+                        const { success, data: rawData } = response;
+                        const { msg, data } = rawData;
+
+                        console.log("RESPONSE:");
+                        console.dir(response);
+
+                        this.success = success;
+
+                        console.log("SUCCESS: ", success, msg);
+                        this.showMessage = true;
+                        this.message = msg;
+
+                        //location.reload();
+                    
+                    });
+                },
                 submitForm() {
-                    var data = {
+                    const data = {
                         'action': 'UpdateSettings',
                         'data': btoa(unescape(encodeURIComponent(JSON.stringify(this.formData))))
                     };
@@ -58,11 +85,11 @@ use Mcisback\WpPlugin\Helpers\Settings;
                         console.log("RESPONSE:");
                         console.dir(response);
 
-                        if(success) {
-                            console.log("SUCCESS: ", msg);
-                            this.showMessage = true;
-                            this.message = msg;
-                        }
+                        this.success = success;
+
+                        console.log("SUCCESS: ", success, msg);
+                        this.showMessage = true;
+                        this.message = msg;
 
                         //location.reload();
                     

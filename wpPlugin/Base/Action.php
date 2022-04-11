@@ -3,33 +3,46 @@
 namespace Mcisback\WpPlugin\Base;
 
 abstract class Action {
-    public function __construct($name) {
-        $this->name = $name;
+    protected ?string $name = null;
+    public bool $isAjax;
+    public bool $useClassNameAsActionName;
+
+    /**
+     * TODO: $extraArgs
+     */
+    public function __construct(
+        string $name, array $extraArgs = []
+    ) {
+        $this->isAjax = false;
+        $this->useClassNameAsActionName = true;
+        $this->extraArgs = $extraArgs;
+
+        return $this->setName($name);
     }
 
     public function getName() {
         return $this->name;
     }
-
-    public function beforeRun() {
-        /* Verify Nonce ?
-        if ( ! wp_verify_nonce( $_POST[ PLUGIN_ID . '_nonce' ], PLUGIN_ID . '_nonce' ) ) {
-            echo json_encode([
-                'success' => false,
-                'message' => 'Invalid Nonce'
-            ]);
-
-            wp_die();
-        } */
-
-        $this->run(
-            json_decode( $_POST['data'], true )
+    
+    public function getClassName() {
+        return end(
+            explode('\\', $this->name)
         );
+    }
+
+    public function setName(string $name) {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    public function beforeRun(...$args) {
+        $this->run(...$args );
     }
 
     public function getRunFunctionName() {
         return 'beforeRun';
     }
 
-    public abstract function run(array $data);
+    public abstract function run(...$args);
 }

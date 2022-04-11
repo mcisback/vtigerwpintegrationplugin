@@ -39,6 +39,10 @@ if( !class_exists('vTigerWpIntegrationPlugin') ) {
                     PLUGIN_PATH
                 );
             }
+
+            $this->loadActions(
+                PLUGIN_PATH
+            );
         }
 
         /* function loadAdminCustomScripts() {
@@ -69,37 +73,32 @@ if( !class_exists('vTigerWpIntegrationPlugin') ) {
         }
 
         function buildAdminMenu () {
-            /* $menu = [
-                'settings' => [
-                    'title' => 'Settings',
-                    'onMenu' => 'Settings',
+            $menu = [
+                'leads' => [
+                    'title' => 'Leads',
+                    'onMenu' => 'Leads',
                     'capabilities' => 'administrator',
                 ],
-                'logs' => [
-                    'title' => 'Logs',
-                    'onMenu' => 'Logs',
-                    'capabilities' => 'administrator',
-                ],
-            ]; */
+            ];
 
             add_menu_page(
                 'vTigerWp',
                 'vTigerWp', // This Shows On Wordpress Menu
                 'administrator',
-                'vtigerwp', // slug
+                PLUGIN_ID, // slug
                 [ $this, 'mainView' ]
             );
 
-            /* foreach($menu as $slug => $menuItem) {
+            foreach($menu as $slug => $menuItem) {
                 add_submenu_page(
-                    'vtigerwp', // parent slug
+                    PLUGIN_ID, // parent slug
                     $menuItem['title'],
                     $menuItem['onMenu'], // This Shows On Wordpress Menu
                     $menuItem['capabilities'],
                     $slug, // slug
                     [ $this, 'mainView' ]
                 );
-            } */
+            }
         }
 
         function mainView () {

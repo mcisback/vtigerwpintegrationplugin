@@ -3,11 +3,20 @@
 namespace Mcisback\vTiger;
 
 class Api {
+    public ?string $baseUrl = null;
+    public ?string $username = null;
+    public ?string $accessKey = null;
+    public ?string $sessionName = null;
+    public $userId = null;
+    public ?string $token = null;
+    public $expireTime = 0;
+    public bool $debug = false;
+
     public function __construct(
         string $baseUrl,
         string $username,
         string $accessKey,
-        bool $debug = false,
+        bool $debug = false 
     ) {
         $this->baseUrl = $baseUrl;
         $this->username = $username;
@@ -19,20 +28,29 @@ class Api {
         $this->debug = $debug;
     }
 
-    public function get(string $operation, array $queryStringData = []) {
-        $queryString = http_build_query([
-            'operation' => $operation,
-            ...$queryStringData,
-        ]);
+    public function get(
+        string $operation, array $queryStringData = []
+    ) {
+        $queryString = http_build_query(
+            array_merge(
+                [
+                    'operation' => $operation,
+                ],
+                $queryStringData
+            )
+        );
 
         if($this->debug) {
-            print_r([
-                'method' =>'GET',
-                'url' => "{$this->baseUrl}/webservice.php",
-                'queryString' => $queryString,
-                'operation' => $operation,
-                ...$queryStringData,
-            ]);
+            print_r(
+                array_merge([
+                    'method' =>'GET',
+                    'url' => "{$this->baseUrl}/webservice.php",
+                    'queryString' => $queryString,
+                    'operation' => $operation,
+                    ],
+                    $queryStringData
+                )
+            );
         }
 
         $curl = curl_init();
@@ -77,7 +95,7 @@ class Api {
 
     public function post(
         string $operation,
-        array $postData = [],
+        array $postData = []
     ) {
         if($this->debug) {
             print_r([
@@ -85,10 +103,14 @@ class Api {
                 'url' => "{$this->baseUrl}/webservice.php",
                 'operation' => $operation,
                 'postData' => $postData,
-                'http_build_query' => http_build_query([
-                    'operation' => $operation,
-                    ...$postData,
-                ]),
+                'http_build_query' => http_build_query(
+                    array_merge(
+                        [
+                        'operation' => $operation
+                        ],
+                        $postData
+                    )
+                ),
             ]);
         }
 
@@ -102,10 +124,14 @@ class Api {
             CURLOPT_TIMEOUT => 30,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => "POST",
-            CURLOPT_POSTFIELDS => http_build_query([
-                'operation' => $operation,
-                ...$postData,
-            ]),
+                CURLOPT_POSTFIELDS => http_build_query(
+                    array_merge(
+                        [
+                        'operation' => $operation
+                        ],
+                        $postData
+                    )
+            ),
             CURLOPT_HTTPHEADER => [
                 "application/x-www-form-urlencoded"
             ],

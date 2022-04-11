@@ -9,10 +9,13 @@ use Mcisback\WpPlugin\Helpers\Settings;
 class UpdateSettings extends wpBaseAction {
     public function __construct() {
         parent::__construct(__CLASS__);
+
+        $this->isAjax = true;
+        $this->useClassNameAsActionName = true;
     }
 
-    public function beforeRun() {
-        $data = base64_decode($_POST['data']);
+    public function beforeRun(...$args) {
+        $data = base64_decode( $_POST['data'] );
 
         $data = json_decode($data, true);
 
@@ -21,13 +24,8 @@ class UpdateSettings extends wpBaseAction {
         );
     }
 
-    public function run(array $data) {
-        //ob_start();
-
-        //print_r($data);
-
-        //$output = ob_get_contents();
-        //ob_end_clean();
+    public function run(...$args) {
+        $data = $args[0];
 
         Settings::gI()->setSome([
             'VTIGER_BASE_URL' => $data['baseUrl'],
